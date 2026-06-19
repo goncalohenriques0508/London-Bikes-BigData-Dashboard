@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>London Bikes — Boxplots Sazonais</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:system-ui,sans-serif; background:#fff; color:#1a1a1a; padding:2rem; max-width:760px; margin:auto; }
+h1 { font-size:18px; font-weight:500; margin-bottom:0.25rem; }
+p.sub { font-size:13px; color:#6b7280; margin-bottom:1.5rem; }
+.btns { display:flex; gap:8px; margin-bottom:1.5rem; flex-wrap:wrap; }
+button { padding:6px 16px; border:1px solid #d1d5db; border-radius:8px; background:#fff; font-size:14px; cursor:pointer; transition: all .15s; }
+button:hover { background:#f3f4f6; }
+button.active { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
+.cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:1.5rem; }
+.card { background:#f9fafb; border-radius:8px; padding:1rem; }
+.card-label { font-size:13px; color:#6b7280; margin-bottom:4px; }
+.card-value { font-size:24px; font-weight:500; }
+svg { width:100%; display:block; }
+.insight { font-size:14px; color:#6b7280; margin-top:1rem; line-height:1.6; min-height:44px; }
+@media (prefers-color-scheme:dark) {
+  body { background:#111; color:#f5f5f5; }
+  button { background:#1f1f1f; border-color:#374151; color:#d1d5db; }
+  button:hover { background:#2d2d2d; }
+  button.active { background:#451a03; border-color:#92400e; color:#fbbf24; }
+  .card { background:#1f1f1f; }
+  .card-label,.insight { color:#9ca3af; }
+}
+</style>
+</head>
+<body>
+<h1>London Bikes — distribuição sazonal de bicicletas e docas vazias</h1>
+<p class="sub">Seleciona a estação do ano para visualizar a distribuição.</p>
+<div class="btns">
+  <button id="btn-Verão" onclick="setSeason('Verão')">Verão</button>
+  <button id="btn-Outono" onclick="setSeason('Outono')">Outono</button>
+  <button id="btn-Primavera" onclick="setSeason('Primavera')">Primavera</button>
+  <button id="btn-Inverno" onclick="setSeason('Inverno')">Inverno</button>
+</div>
+<div class="cards">
+  <div class="card"><div class="card-label">mediana — bicicletas</div><div class="card-value" id="stat-bm">—</div></div>
+  <div class="card"><div class="card-label">mediana — docas vazias</div><div class="card-value" id="stat-dm">—</div></div>
+  <div class="card"><div class="card-label">IQR bicicletas (Q1–Q3)</div><div class="card-value" id="stat-bi">—</div></div>
+  <div class="card"><div class="card-label">IQR docas vazias (Q1–Q3)</div><div class="card-value" id="stat-di">—</div></div>
+</div>
+<svg id="chart" viewBox="0 0 620 220"></svg>
+<p class="insight" id="insight"></p>
+<script>
+const data={"Verão": {"bikes": {"min": 0, "q1": 3, "med": 8, "q3": 16, "max": 63}, "docks": {"min": 0, "q1": 8, "med": 15, "q3": 21, "max": 64}}, "Outono": {"bikes": {"min": 0, "q1": 5, "med": 11, "q3": 17, "max": 64}, "docks": {"min": 0, "q1": 7, "med": 14, "q3": 20, "max": 64}}, "Primavera": {"bikes": {"min": 0, "q1": 6, "med": 12, "q3": 19, "max": 64}, "docks": {"min": 0, "q1": 6, "med": 12, "q3": 18, "max": 64}}, "Inverno": {"bikes": {"min": 0, "q1": 6, "med": 12, "q3": 19, "max": 64}, "docks": {"min": 0, "q1": 6, "med": 12, "q3": 19, "max": 64}}}, insights={"Verão": "O Verão apresenta a assimetria mais clara — a mediana de bicicletas disponíveis (8) é significativamente inferior à mediana de docas vazias (15), refletindo uma maior procura durante os meses mais quentes.", "Outono": "O Outono é uma estação de transição — bicicletas (11) e docas vazias (14) estão mais próximas do que no Verão, mas a utilização mantém-se acima do nível de base do Inverno.", "Primavera": "A distribuição na Primavera é praticamente equilibrada — a mediana de bicicletas e de docas vazias é ambas 12, sugerindo uma utilização moderada e estável.", "Inverno": "O Inverno é a estação mais equilibrada — a mediana de bicicletas e de docas vazias é idêntica (12), indicando uma procura mais baixa e uniforme."};
+const colors={'Verão':'#B45309','Outono':'#7C3AED','Primavera':'#15803D','Inverno':'#1D4ED8'};
+const RANGE=64,W=620,H=220,PL=120,PR=20,PT=30,PB=40,PW=W-PL-PR;
+function xp(v){return PL+(v/RANGE)*PW;}
+function el(tag,attrs,text){
+  const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const[k,v] of Object.entries(attrs))e.setAttribute(k,v);
+  if(text!==undefined)e.textContent=text;
+  return e;
+}
+function drawBox(svg,s,cy,color,label){
+  const BH=22;
+  svg.appendChild(el('text',{x:PL-8,y:cy+4,'text-anchor':'end','font-size':'13',fill:'#6b7280'},label));
+  svg.appendChild(el('line',{x1:xp(s.min),x2:xp(s.q1),y1:cy,y2:cy,stroke:color,'stroke-width':'1.5'}));
+  svg.appendChild(el('line',{x1:xp(s.q3),x2:xp(s.max),y1:cy,y2:cy,stroke:color,'stroke-width':'1.5'}));
+  svg.appendChild(el('line',{x1:xp(s.min),x2:xp(s.min),y1:cy-7,y2:cy+7,stroke:color,'stroke-width':'1.5'}));
+  svg.appendChild(el('line',{x1:xp(s.max),x2:xp(s.max),y1:cy-7,y2:cy+7,stroke:color,'stroke-width':'1.5'}));
+  svg.appendChild(el('rect',{x:xp(s.q1),y:cy-BH/2,width:xp(s.q3)-xp(s.q1),height:BH,fill:color,opacity:'0.18',rx:'3'}));
+  svg.appendChild(el('rect',{x:xp(s.q1),y:cy-BH/2,width:xp(s.q3)-xp(s.q1),height:BH,fill:'none',stroke:color,'stroke-width':'1.5',rx:'3'}));
+  svg.appendChild(el('line',{x1:xp(s.med),x2:xp(s.med),y1:cy-BH/2,y2:cy+BH/2,stroke:color,'stroke-width':'2.5'}));
+  svg.appendChild(el('text',{x:xp(s.med),y:cy-BH/2-5,'text-anchor':'middle','font-size':'11',fill:color},s.med));
+}
+function drawAxes(svg){
+  [0,10,20,30,40,50,60].forEach(v=>{
+    svg.appendChild(el('text',{x:xp(v),y:H-PB+16,'text-anchor':'middle','font-size':'11',fill:'#9ca3af'},v));
+    svg.appendChild(el('line',{x1:xp(v),x2:xp(v),y1:H-PB,y2:H-PB+4,stroke:'#e5e7eb','stroke-width':'1'}));
+  });
+  svg.appendChild(el('line',{x1:PL,x2:W-PR,y1:H-PB,y2:H-PB,stroke:'#e5e7eb','stroke-width':'0.5'}));
+}
+function setSeason(season){
+  const svg=document.getElementById('chart');
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  drawAxes(svg);
+  const d=data[season],color=colors[season];
+  drawBox(svg,d.bikes,PT+(H-PT-PB)*0.28,color,'bicicletas');
+  drawBox(svg,d.docks,PT+(H-PT-PB)*0.72,color,'docas vazias');
+  document.getElementById('stat-bm').textContent=d.bikes.med;
+  document.getElementById('stat-dm').textContent=d.docks.med;
+  document.getElementById('stat-bi').textContent=d.bikes.q1+' – '+d.bikes.q3;
+  document.getElementById('stat-di').textContent=d.docks.q1+' – '+d.docks.q3;
+  document.getElementById('insight').textContent=insights[season];
+  document.querySelectorAll('.btns button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+season).classList.add('active');
+}
+setSeason('Verão');
+</script>
+</body>
+</html>
