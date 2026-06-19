@@ -8,7 +8,7 @@
 
 End-to-end Big Data project on urban mobility and bike-sharing in London. Raw station data is ingested with **PySpark**, persisted in **MongoDB**, clustered with **K-Means**, and explored through an interactive **Streamlit** dashboard.
 
-> ⚠️ The `archive/` folder (~2.3 GB of raw CSVs) is excluded from this repo. Download the dataset from [Kaggle — London's Rental Bicycle Network Usage](https://www.kaggle.com/datasets/ioexception/london-cycles/data) and place it in `archive/` before running the pipeline.
+> ⚠️ The `archive/` (~2.4 GB of raw CSVs) and `data/` (processed Parquet files) folders are excluded from this repo. Download the dataset from [Kaggle — London's Rental Bicycle Network Usage](https://www.kaggle.com/datasets/ioexception/london-cycles/data), place it in `archive/`, and run the notebooks sequentially to generate `data/`.
 
 ---
 
