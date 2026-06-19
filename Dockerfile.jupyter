@@ -1,0 +1,22 @@
+FROM jupyter/pyspark-notebook:latest
+
+USER root
+
+COPY requirements.txt /tmp/requirements.txt
+
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+ARG MONGODB_CONNECTOR_VERSION=10.3.0
+ARG MONGODB_DRIVER_VERSION=4.11.1
+
+RUN echo "Downloading MongoDB Spark Connector version ${MONGODB_CONNECTOR_VERSION}" && \
+    wget https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.12/${MONGODB_CONNECTOR_VERSION}/mongo-spark-connector_2.12-${MONGODB_CONNECTOR_VERSION}.jar -P /usr/local/spark/jars/
+
+RUN echo "Downloading MongoDB Driver dependencies version ${MONGODB_DRIVER_VERSION}" && \
+    wget https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/${MONGODB_DRIVER_VERSION}/mongodb-driver-sync-${MONGODB_DRIVER_VERSION}.jar -P /usr/local/spark/jars/ && \
+    wget https://repo1.maven.org/maven2/org/mongodb/bson/${MONGODB_DRIVER_VERSION}/bson-${MONGODB_DRIVER_VERSION}.jar -P /usr/local/spark/jars/ && \
+    wget https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-core/${MONGODB_DRIVER_VERSION}/mongodb-driver-core-${MONGODB_DRIVER_VERSION}.jar -P /usr/local/spark/jars/
+
+USER ${NB_UID}
+
+WORKDIR /home/jovyan/work
