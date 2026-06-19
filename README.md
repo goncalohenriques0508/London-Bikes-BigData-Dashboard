@@ -1,3 +1,17 @@
+# 🚲 London Bikes — Big Data Dashboard
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![PySpark](https://img.shields.io/badge/PySpark-E25A1C?style=flat&logo=apachespark&logoColor=white)
+
+End-to-end Big Data project on urban mobility and bike-sharing in London. Raw station data is ingested with **PySpark**, persisted in **MongoDB**, clustered with **K-Means**, and explored through an interactive **Streamlit** dashboard.
+
+> ⚠️ The `archive/` folder (~2.4 GB of raw CSVs) is excluded from this repo. Download the dataset from [Kaggle — London Bike Sharing](https://www.kaggle.com/datasets/hmavrodiev/london-bike-sharing-dataset) and place it in `archive/` before running the pipeline.
+
+---
+
 # Projeto Final - London Bikes
 
 Ambiente dedicado ao projeto final de Big Data sobre mobilidade urbana e aluguer/utilizacao de bicicletas em Londres.
